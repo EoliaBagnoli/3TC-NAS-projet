@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<network bgp="False">
+    <as number="1" rip="False" ospf="True" loopback_subnet="127.0.0." ip_address_subnet="192.168." ip_mask="255.255.255.248">
+        <router name="PE1" num ="1" PE="True">
+            <neighbor name="P1" int="G 1" num="2"/>
+        </router>
+        <router name="P1" num ="2" PE="False">
+            <neighbor name="PE1" int="G 1" num="1"/>
+            <neighbor name="P2" int="G 2" num="3"/>
+        </router>
+        <router name="P2" num ="3" PE="False">
+            <neighbor name="P1" int="G 2" num="2"/>
+            <neighbor name="PE2" int="G 1" num="4"/>
+        </router>
+        <router name="PE2" num ="4" PE="True">
+            <neighbor name="P2" int="G 1" num="3"/>
+        </router>
+    </as>
+</network>
