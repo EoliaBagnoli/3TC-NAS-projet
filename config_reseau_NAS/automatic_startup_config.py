@@ -20,6 +20,7 @@ for as_elem in root.findall("as"):
     ip_subnet = as_elem.attrib["ip_address_subnet"]
     ip_mask = as_elem.attrib["ip_mask"]
     loopback_subnet = as_elem.attrib["loopback_subnet"]
+    loopback_mask = "255.255.255.255"
 
     print(f"rip : {rip_enable}")
     print(f"ospf : {ospf_enable}")
@@ -42,10 +43,10 @@ for as_elem in root.findall("as"):
         config_lines = []
 
 #*******************************************************************préli et config @loopback******************************************************************************
-        config_lines.append(f"version 15.2\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\n!\nhostname {router_name}\n!\nboot-start-marker\nboot-end-marker\n!\nno aaa new-model\nno ip icmp rate-limit unreachable\nip cef\n!\nno ip domain lookup\nipv6 unicast-routing\nipv6 cef\n!\nmultilink bundle-name authenticated\n!\nip tcp synwait-time 5\n!\n!")
+        config_lines.append(f"version 15.2\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\n!\nhostname {router_name}\n!\nboot-start-marker\nboot-end-marker\n!\nno aaa new-model\nno ip icmp rate-limit unreachable\nip cef\n!\nno ip domain lookup\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\nip tcp synwait-time 5\n!\n!")
         config_lines.append(f"interface Loopback0\nno ip address\nnegotiation auto")
 
-        #config_lines.append(f"ipv4 address {loopback_subnet}/128")
+        config_lines.append(f"ip address {loopback_subnet}{router_num} {loopback_mask}")
         if rip_enable == True :
             config_lines.append(f"ip rip ripng enable")
         if ospf_enable == True :
@@ -73,18 +74,13 @@ for as_elem in root.findall("as"):
                 set_networks_as.add(f"{neighbor_num}{router_num}")
                 config_lines.append(f"ip address {ip_subnet}{neighbor_num}{router_num}.{router_num} {ip_mask}")
 
-            config_file.append("negocitation auto")
+            config_lines.append("negotiation auto")
+            config_lines.append("no shutdown")
             if rip_enable == True :
-                config_lines.append(f"ipv6 rip ripng enable")
+                config_lines.append(f"ip rip ripng enable")
             if ospf_enable == True :
-                config_lines.append(f"ipv6 ospf 100 area {as_number}")
+                config_lines.append(f"ip ospf 100 area {as_number}")
             config_lines.append(f"!")
-
-#*******************************************************************config ospf*******************************************************************
-        if ospf_enable == True :
-            config_lines.append(f"router ospf 100")
-            config_lines.append(f"")
-
 
 #*******************************************************************config bgp préli******************************************************************************************
         if bgp_enable == True : 
@@ -95,12 +91,13 @@ for as_elem in root.findall("as"):
             config_lines.append(f"redistribute connected")
 
 #*******************************************************************suite en fin config************************************************************************************
-        config_lines.append(f"ip forward-protocol nd\n!\nno ip http server\nno ip http secure-server\n!")
-
         if rip_enable == True :
-            config_lines.append(f"ipv6 router rip ripng")
+            config_lines.append(f"ip router rip ripng")
         if ospf_enable == True :
-            config_lines.append(f"ipv6 router ospf 100\nrouter-id {router_num}.{router_num}.{router_num}.{router_num}")
+            config_lines.append(f"router ospf 100\nrouter-id {router_num}.{router_num}.{router_num}.{router_num}")
+
+        config_lines.append(f"!\nip forward-protocol nd\n!\nno ip http server\nno ip http secure-server\n!")
+
         config_lines.append(f"!\ncontrol-plane\n!\nline con 0\nexec-timeout 0 0\nprivilege level 15\nlogging synchronous\nstopbits 1\nline aux 0\nexec-timeout 0 0\nprivilege level 15\nlogging synchronous\nstopbits 1\nline vty 0 4\nlogin\n!\nend")
         
 
@@ -117,11 +114,6 @@ for as_elem in root.findall("as"):
             id_chelou =  "0d402282-206f-4a86-9850-c2241253d22e"
         
         path = os.getcwd()+"/project-files/dynamips/"+str(id_chelou)+"/configs"
-        #print(path)
-        #try :
-            #os.mkdir(path, mode = 0o777)
-        #except OSError as e : 
-            #print(os.strerror(e.errno))
 
         path = path+"/i"+str(router_num)+"_startup-config.cfg"
         with open(path, "w") as config_file:
