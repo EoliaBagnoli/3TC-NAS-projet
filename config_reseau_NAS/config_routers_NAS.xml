@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <network bgp="False">
-    <as number="1" rip="False" ospf="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.248">
+    <as number="1" rip="False" ospf="True" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.248">
         <router name="PE1" num ="1" PE="True">
             <neighbor name="P1" int="G 1" num="2"/>
         </router>

@@ -17,6 +17,7 @@ for as_elem in root.findall("as"):
     as_number = int(as_elem.attrib["number"])
     rip_enable = eval(as_elem.attrib["rip"])
     ospf_enable = eval(as_elem.attrib["ospf"])
+    mpls_enable = eval(as_elem.attrib["mpls"])
     ip_subnet = as_elem.attrib["ip_address_subnet"]
     ip_mask = as_elem.attrib["ip_mask"]
     loopback_subnet = as_elem.attrib["loopback_subnet"]
@@ -42,10 +43,16 @@ for as_elem in root.findall("as"):
         #buffer pour fichiers de config
         config_lines = []
 
-#*******************************************************************préli et config @loopback******************************************************************************
+#*******************************************************************préli******************************************************************************
         config_lines.append(f"version 15.2\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\n!\nhostname {router_name}\n!\nboot-start-marker\nboot-end-marker\n!\nno aaa new-model\nno ip icmp rate-limit unreachable\nip cef\n!\nno ip domain lookup\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\nip tcp synwait-time 5\n!\n!")
-        config_lines.append(f"interface Loopback0\nno ip address\nnegotiation auto")
+        
+#*******************************************************************config mpls******************************************************************************
+        if mpls_enable == True :
+            config_lines.append(f"mpls ip")
+            config_lines.append(f"mpls label protocol ldp")
 
+#*******************************************************************config @loopback******************************************************************************
+        config_lines.append(f"interface Loopback0\nno ip address\nnegotiation auto")
         config_lines.append(f"ip address {loopback_subnet}{router_num} {loopback_mask}")
         if rip_enable == True :
             config_lines.append(f"ip rip ripng enable")
@@ -80,6 +87,9 @@ for as_elem in root.findall("as"):
                 config_lines.append(f"ip rip ripng enable")
             if ospf_enable == True :
                 config_lines.append(f"ip ospf 100 area {as_number}")
+            if mpls_enable == True :
+                config_lines.append(f"mpls ip")
+                config_lines.append(f"mpls ldp autoconfig")
             config_lines.append(f"!")
 
 #*******************************************************************config bgp préli******************************************************************************************
