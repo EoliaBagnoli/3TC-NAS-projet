@@ -11,6 +11,7 @@ try :
 except : 
     print("Dynamips existe déjà")
 bgp_enable = eval(root.attrib["bgp"])
+i=1
 
 for as_elem in root.findall("as"):
 
@@ -74,12 +75,18 @@ for as_elem in root.findall("as"):
             elif str(neighbor_int_tab[0]) == "F" : 
                 config_lines.append(f"interface FastEthernet{neighbor_int_tab[1]}/0")
 
-            if neighbor_num>router_num : 
-                set_networks_as.add(f"{router_num}{neighbor_num}")
-                config_lines.append(f"ip address {ip_subnet}{router_num}{neighbor_num}.{router_num} {ip_mask}")
-            elif neighbor_num<router_num :  
-                set_networks_as.add(f"{neighbor_num}{router_num}")
-                config_lines.append(f"ip address {ip_subnet}{neighbor_num}{router_num}.{router_num} {ip_mask}")
+            if((router_elem.attrib["PE"] == "True") and neighbor_elem.attrib["client"] == "True") :
+                config_lines.append(f"ip address 192.168.{i}.{router_num} {ip_mask}")
+                i+=1; 
+            elif(router_elem.attrib["CE"] == "True") :
+                config_lines.append(f"ip address 192.168.{router_name[2:3]}.{router_num} {ip_mask}")
+            else : 
+                if neighbor_num>router_num : 
+                    set_networks_as.add(f"{router_num}{neighbor_num}")
+                    config_lines.append(f"ip address {ip_subnet}{router_num}{neighbor_num}.{router_num} {ip_mask}")
+                elif neighbor_num<router_num :  
+                    set_networks_as.add(f"{neighbor_num}{router_num}")
+                    config_lines.append(f"ip address {ip_subnet}{neighbor_num}{router_num}.{router_num} {ip_mask}")
 
             config_lines.append("negotiation auto")
             config_lines.append("no shutdown")
@@ -99,6 +106,8 @@ for as_elem in root.findall("as"):
             config_lines.append(f"bgp log-neighbor-changes")
             config_lines.append(f"no bgp default ipv4-unicast")
             config_lines.append(f"redistribute connected")
+
+#*******************************************************************config VPN******************************************************************************************
 
 #*******************************************************************suite en fin config************************************************************************************
         if rip_enable == True :
@@ -122,6 +131,14 @@ for as_elem in root.findall("as"):
             id_chelou =  "2c679b1b-8eec-4f24-8d1c-0b61af2a72ae"
         elif router_num == 4 :
             id_chelou =  "0d402282-206f-4a86-9850-c2241253d22e"
+        elif router_num == 5 :
+            id_chelou =  "b23d42b0-7962-496c-8105-18bd5dca4c9f"
+        elif router_num == 6 :
+            id_chelou =  "ba57c209-668e-49ba-8286-3d3c36da5a19"
+        elif router_num == 7 :
+            id_chelou =  "16d20c03-ac13-473e-84bb-f39dad87ee00"
+        elif router_num == 8 :
+            id_chelou =  "8e5bab10-d167-4478-8efe-6000ec68eae0"
         
         path = os.getcwd()+"/project-files/dynamips/"+str(id_chelou)+"/configs"
 
