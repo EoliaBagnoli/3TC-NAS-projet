@@ -10,7 +10,6 @@ try :
     os.mkdir("/project-files/dynamips")
 except : 
     print("Dynamips existe déjà")
-bgp_enable = eval(root.attrib["bgp"])
 i=1
 
 for as_elem in root.findall("as"):
@@ -39,7 +38,8 @@ for as_elem in root.findall("as"):
         #en partant du potulat qu'on nomme les routers("PE{as_number}{router_num}. router_id correspond au numéro du router au niveau des configs. router_br indique si le router est de bordure ou pas")
         router_name = str(router_elem.attrib["name"])
         router_num = int(router_elem.attrib["num"])
-        router_PE = router_elem.attrib["PE"]
+        router_PE = eval(router_elem.attrib["PE"])
+        router_CE = eval(router_elem.attrib["CE"])
 
         #buffer pour fichiers de config
         config_lines = []
@@ -95,11 +95,20 @@ for as_elem in root.findall("as"):
             config_lines.append(f"!")
 
 #*******************************************************************config bgp préli******************************************************************************************
-        if bgp_enable == True : 
+        if router_PE == True or router_CE == True : 
             config_lines.append(f"router bgp {as_number}")
-            config_lines.append(f"bgp router {as_number}{router_num}.{as_number}{router_num}.{as_number}{router_num}.{as_number}{router_num}")
-            config_lines.append(f"bgp log-neighbor-changes")
-            config_lines.append(f"redistribute connected")
+            #config_lines.append(f"bgp log-neighbor-changes")
+            #config_lines.append(f"redistribute connected")
+
+#*******************************************************************bgp déclaration voisins*******************************************************************************
+
+        if router_PE == True : 
+            for neighbor_PE in as_elem.findall("router"):
+                if neighbor_PE.attrib["PE"] == "True" and neighbor_PE.attrib["num"] != router_elem.attrib["num"] : 
+                    neighbor_num = neighbor_PE.attrib["num"]
+                    config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {as_number}")
+                    config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
+            config_lines.append(f"!")
 
 #*******************************************************************config VPN******************************************************************************************
 
