@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <network bgp="False">
-    <as number="1" rip="False" ospf="True" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.248">
+    <as number="1" rip="False" ospf="True" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.240">
         <router name="PE1" num ="1" PE="True" CE="False">
             <neighbor name="P1" int="G 1" num="2" client="False"/>
             <neighbor name="CE1" int="G 2" num="5" client="True" VPN ="100"/>
@@ -21,22 +21,22 @@
             <neighbor name="CE4" int="G 3" num="8" client="True" VPN ="200"/>
         </router>
     </as>
-    <as number="2" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.169." ip_mask="255.255.255.248">
+    <as number="2" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.240">
         <router name="CE1" num ="5" PE="False" CE="True">
             <neighbor name="PE1" int="G 1" num="1" client="False"/>
         </router>
     </as>
-    <as number="3" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.170." ip_mask="255.255.255.248">
+    <as number="3" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.240">
         <router name="CE2" num ="6" PE="False" CE="True">
             <neighbor name="PE1" int="G 1" num="1" client="False"/>
         </router>
     </as>
-    <as number="4" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.171." ip_mask="255.255.255.248">
+    <as number="4" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.240">
         <router name="CE3" num ="7" PE="False" CE="True">
             <neighbor name="PE2" int="G 1" num="4" client="False"/>
         </router>
     </as>
-    <as number="5" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.172." ip_mask="255.255.255.248">
+    <as number="5" rip="False" ospf="False" mpls="True" loopback_subnet="10.10.10." ip_address_subnet="192.168." ip_mask="255.255.255.240">
         <router name="CE4" num ="8" PE="False" CE="True">
             <neighbor name="PE2" int="G 1" num="4" client="False"/>
         </router>

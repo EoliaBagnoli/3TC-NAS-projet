@@ -75,18 +75,13 @@ for as_elem in root.findall("as"):
             elif str(neighbor_int_tab[0]) == "F" : 
                 config_lines.append(f"interface FastEthernet{neighbor_int_tab[1]}/0")
 
-            if((router_elem.attrib["PE"] == "True") and neighbor_elem.attrib["client"] == "True") :
-                config_lines.append(f"ip address 192.168.{i}.{router_num} {ip_mask}")
-                i+=1; 
-            elif(router_elem.attrib["CE"] == "True") :
-                config_lines.append(f"ip address 192.168.{router_name[2:3]}.{router_num} {ip_mask}")
-            else : 
-                if neighbor_num>router_num : 
-                    set_networks_as.add(f"{router_num}{neighbor_num}")
-                    config_lines.append(f"ip address {ip_subnet}{router_num}{neighbor_num}.{router_num} {ip_mask}")
-                elif neighbor_num<router_num :  
-                    set_networks_as.add(f"{neighbor_num}{router_num}")
-                    config_lines.append(f"ip address {ip_subnet}{neighbor_num}{router_num}.{router_num} {ip_mask}")
+            #à changer si on a le temps 
+            if neighbor_num>router_num : 
+                set_networks_as.add(f"{router_num}{neighbor_num}")
+                config_lines.append(f"ip address {ip_subnet}{router_num}{neighbor_num}.{router_num} {ip_mask}")
+            elif neighbor_num<router_num :  
+                set_networks_as.add(f"{neighbor_num}{router_num}")
+                config_lines.append(f"ip address {ip_subnet}{neighbor_num}{router_num}.{router_num} {ip_mask}")
 
             config_lines.append("negotiation auto")
             config_lines.append("no shutdown")
@@ -104,7 +99,6 @@ for as_elem in root.findall("as"):
             config_lines.append(f"router bgp {as_number}")
             config_lines.append(f"bgp router {as_number}{router_num}.{as_number}{router_num}.{as_number}{router_num}.{as_number}{router_num}")
             config_lines.append(f"bgp log-neighbor-changes")
-            config_lines.append(f"no bgp default ipv4-unicast")
             config_lines.append(f"redistribute connected")
 
 #*******************************************************************config VPN******************************************************************************************
