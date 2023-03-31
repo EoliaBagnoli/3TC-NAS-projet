@@ -166,7 +166,7 @@ for as_elem in root.findall("as"):
             for neighbor_PE in router_elem.findall("neighbor"):
                 neighbor_num = neighbor_PE.attrib["num"]
                 neighbor_as = neighbor_PE.attrib["AS"]
-                config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.240")
+                config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.255")
                 config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {neighbor_as}")
                 config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
         
@@ -175,7 +175,7 @@ for as_elem in root.findall("as"):
 #*******************************************************************config address family ******************************************************************************************
         if router_PE == True :
             config_lines.append(f"address-family ipv4")
-            config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.240")
+            config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.255")
             for neighbor_PE in as_elem.findall("router"):
                 if neighbor_PE.attrib["PE"] == "True" and neighbor_PE.attrib["num"] != router_elem.attrib["num"] : 
                     neighbor_num = neighbor_PE.attrib["num"]
