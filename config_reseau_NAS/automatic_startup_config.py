@@ -40,25 +40,54 @@ for as_elem in root.findall("as"):
         router_num = int(router_elem.attrib["num"])
         router_PE = eval(router_elem.attrib["PE"])
         router_CE = eval(router_elem.attrib["CE"])
+        liste_VRF = set()
+        dico_VRF = {}
 
         #buffer pour fichiers de config
         config_lines = []
+        
+        if router_PE == True : 
+            for neighbor_elem in router_elem.findall("neighbor"):
+                if neighbor_elem.attrib["client"] == "True" : 
+                    liste_VRF.add(neighbor_elem.attrib["VRF"])
 
-#*******************************************************************préli******************************************************************************
-        config_lines.append(f"version 15.2\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\n!\nhostname {router_name}\n!\nboot-start-marker\nboot-end-marker\n!\nno aaa new-model\nno ip icmp rate-limit unreachable\nip cef\n!\nno ip domain lookup\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\nip tcp synwait-time 5\n!\n!")
+
+#*******************************************************************config préli******************************************************************************
+        config_lines.append(f"version 15.2\nservice timestamps debug datetime msec\nservice timestamps log datetime msec\n!\nhostname {router_name}\n!\nboot-start-marker\nboot-end-marker\n!")
+
+#*******************************************************************définition du VRF******************************************************************************
+        if router_PE == True : 
+            for VRF in liste_VRF : 
+                config_lines.append(f"vrf definition {VRF}")
+                if VRF == "bleu" :
+                    truc = "1:3"
+                if VRF == "rouge" :
+                    truc = "2:4"
+                config_lines.append(f"rd {truc}")
+                config_lines.append(f"route-target export {truc}")   
+                config_lines.append(f"route-target import {truc}")  
+                config_lines.append(f"!")
+                config_lines.append(f"address-family ipv4")
+                config_lines.append(f"exit-address-family")
+                config_lines.append(f"!")
+            config_lines.append(f"!")         
+          
+#*******************************************************************suite et fin config préli******************************************************************************                  
+        config_lines.append(f"no aaa new-model\nno ip icmp rate-limit unreachable\nip cef\n!\nno ip domain lookup\nno ipv6 cef\n!\nmultilink bundle-name authenticated\n!\nip tcp synwait-time 5\n!\n!")
         
 #*******************************************************************config mpls******************************************************************************
-        if mpls_enable == True :
+        """ if mpls_enable == True :
             config_lines.append(f"mpls ip")
             config_lines.append(f"mpls label protocol ldp")
+            config_lines.append(f"!") """
 
 #*******************************************************************config @loopback******************************************************************************
-        config_lines.append(f"interface Loopback0\nno ip address\nnegotiation auto")
+        config_lines.append(f"interface Loopback0")
         config_lines.append(f"ip address {loopback_subnet}{router_num} {loopback_mask}")
         if rip_enable == True :
             config_lines.append(f"ip rip ripng enable")
         if ospf_enable == True :
-            config_lines.append(f"ip ospf 100 area 1")
+            config_lines.append(f"ip ospf 100 area 1 secondaries none")
         config_lines.append(f"!")
 
 #*******************************************************************config @ipv4 sur int correspondantes et activation rip/ospf*******************************************************************
@@ -75,28 +104,52 @@ for as_elem in root.findall("as"):
             elif str(neighbor_int_tab[0]) == "F" : 
                 config_lines.append(f"interface FastEthernet{neighbor_int_tab[1]}/0")
 
-            #à changer si on a le temps 
+            if router_PE == True and neighbor_elem.attrib["client"] == "True" :
+                config_lines.append(f"vrf forwarding {neighbor_elem.attrib['VRF']}")
+
             if neighbor_num>router_num : 
                 set_networks_as.add(f"{router_num}{neighbor_num}")
-                config_lines.append(f"ip address {ip_subnet}{router_num}{neighbor_num}.{router_num} {ip_mask}")
+                link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
+                config_lines.append(f"ip address {link_address} {ip_mask}")
             elif neighbor_num<router_num :  
                 set_networks_as.add(f"{neighbor_num}{router_num}")
-                config_lines.append(f"ip address {ip_subnet}{neighbor_num}{router_num}.{router_num} {ip_mask}")
+                link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
+                config_lines.append(f"ip address {link_address} {ip_mask}")
+
+            if router_PE == True and neighbor_elem.attrib["client"] == "True" : 
+                if neighbor_num>router_num : 
+                    remote_as_num = neighbor_elem.attrib["AS"]
+                    neighbor_address = f"{ip_subnet}{router_num}{neighbor_num}.{neighbor_num} as {remote_as_num}"
+                elif neighbor_num<router_num :  
+                    remote_as_num = neighbor_elem.attrib["AS"]
+                    neighbor_address = f"{ip_subnet}{router_num}{neighbor_num}.{neighbor_num} as {remote_as_num}"
+                dico_VRF[neighbor_address] = neighbor_elem.attrib["VRF"]
 
             config_lines.append("negotiation auto")
             config_lines.append("no shutdown")
             if rip_enable == True :
                 config_lines.append(f"ip rip ripng enable")
             if ospf_enable == True :
-                config_lines.append(f"ip ospf 100 area {as_number}")
-            if mpls_enable == True :
+                if router_PE == False or (router_PE == True and neighbor_elem.attrib["client"] == "False") :
+                    config_lines.append(f"ip ospf 100 area {as_number}")
+            """ if mpls_enable == True :
                 config_lines.append(f"mpls ip")
-                config_lines.append(f"mpls ldp autoconfig")
+                config_lines.append(f"mpls ldp autoconfig") """
             config_lines.append(f"!")
+
+#*******************************************************************config rip ospf******************************************************************************************
+       
+        if rip_enable == True :
+            config_lines.append(f"ip router rip ripng")
+        if ospf_enable == True :
+            config_lines.append(f"router ospf 100\nrouter-id {router_num}.{router_num}.{router_num}.{router_num}")
+            config_lines.append(f"mpls ldp autoconfig")
+        config_lines.append(f"!")
 
 #*******************************************************************config bgp préli******************************************************************************************
         if router_PE == True or router_CE == True : 
             config_lines.append(f"router bgp {as_number}")
+            config_lines.append(f"bgp log-neighbor-changes")
             #config_lines.append(f"bgp log-neighbor-changes")
             #config_lines.append(f"redistribute connected")
 
@@ -108,42 +161,61 @@ for as_elem in root.findall("as"):
                     neighbor_num = neighbor_PE.attrib["num"]
                     config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {as_number}")
                     config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
-            for neighbor_CE in router_elem.findall("neighbor"):
-                if neighbor_CE.attrib["client"] == "True" : 
-                    neighbor_num = neighbor_CE.attrib["num"]
-                    neighbor_as = neighbor_CE.attrib["AS"]
-                    config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {neighbor_as}")
-                    config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
-
+            
         if router_CE == True :
             for neighbor_PE in router_elem.findall("neighbor"):
                 neighbor_num = neighbor_PE.attrib["num"]
                 neighbor_as = neighbor_PE.attrib["AS"]
+                config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.240")
                 config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {neighbor_as}")
                 config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
         
         config_lines.append(f"!")
 
+#*******************************************************************config address family ******************************************************************************************
+        if router_PE == True :
+            config_lines.append(f"address-family ipv4")
+            config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.240")
+            for neighbor_PE in as_elem.findall("router"):
+                if neighbor_PE.attrib["PE"] == "True" and neighbor_PE.attrib["num"] != router_elem.attrib["num"] : 
+                    neighbor_num = neighbor_PE.attrib["num"]
+                    config_lines.append(f"neighbor 10.10.10.{neighbor_num} activate")
+            config_lines.append(f"exit-address-family")
+        config_lines.append(f"!")
+
+
 #*******************************************************************config VPN******************************************************************************************
 
         if router_PE == True :
-            for network in set_networks_as : 
-                config_lines.append(f"address-family vpnv4")
-                config_lines.append(f"neighbor 10.10.10.{} activate")
-                config_lines.append(f"neighbor 10.10.10.{} send-community extended")
+            for routers in as_elem.findall("router"):
+                if routers.attrib["PE"] == "True" and routers.attrib["num"] != router_elem.attrib["num"] : 
+                    vpn4_neighbor_num = routers.attrib["num"]
+                    config_lines.append(f"address-family vpnv4")
+                    config_lines.append(f"neighbor 10.10.10.{vpn4_neighbor_num} activate")
+                    config_lines.append(f"neighbor 10.10.10.{vpn4_neighbor_num} send-community extended")
+                    config_lines.append(f"exit-address-family")
+                    config_lines.append(f"!")
+
+#*******************************************************************config VRF******************************************************************************************
+
+        if router_PE == True :
+            for VRF in liste_VRF : 
+                config_lines.append(f"address-family ipv4 vrf {VRF}")
+                config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.255")
+                for i in dico_VRF.items() : 
+                    if i[1] == VRF : 
+                        name = i[0].split(" as ")
+                        print(name)
+                        config_lines.append(f"neighbor {name[0]} remote-as {name[1]}")
+                        config_lines.append(f"neighbor {name[0]} activate")
                 config_lines.append(f"exit-address-family")
                 config_lines.append(f"!")
 
+
+
 #*******************************************************************suite en fin config************************************************************************************
-        if rip_enable == True :
-            config_lines.append(f"ip router rip ripng")
-        if ospf_enable == True :
-            config_lines.append(f"router ospf 100\nrouter-id {router_num}.{router_num}.{router_num}.{router_num}")
-
         config_lines.append(f"!\nip forward-protocol nd\n!\nno ip http server\nno ip http secure-server\n!")
-
         config_lines.append(f"!\ncontrol-plane\n!\nline con 0\nexec-timeout 0 0\nprivilege level 15\nlogging synchronous\nstopbits 1\nline aux 0\nexec-timeout 0 0\nprivilege level 15\nlogging synchronous\nstopbits 1\nline vty 0 4\nlogin\n!\nend")
-        
 
 #*******************************************************************écriture dans les fichiers******************************************************************************
 # gns3 fy
