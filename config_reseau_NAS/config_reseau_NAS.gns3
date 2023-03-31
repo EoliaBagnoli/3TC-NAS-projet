@@ -10,7 +10,7 @@
     "scene_height": 1000,
     "scene_width": 2000,
     "show_grid": false,
-    "show_interface_labels": false,
+    "show_interface_labels": true,
     "show_layers": false,
     "snap_to_grid": false,
     "supplier": null,
@@ -605,7 +605,7 @@
                 "template_id": "5b914570-9cc4-4494-9cdf-90b3fd647b01",
                 "width": 66,
                 "x": -700,
-                "y": -273,
+                "y": -274,
                 "z": 1
             },
             {
@@ -620,7 +620,7 @@
                     "rotation": 0,
                     "style": "font-family: TypeWriter;font-size: 10.0;font-weight: bold;fill: #000000;fill-opacity: 1.0;",
                     "text": "CE3",
-                    "x": 13,
+                    "x": 11,
                     "y": -25
                 },
                 "locked": false,
