@@ -107,11 +107,11 @@ for as_elem in root.findall("as"):
             if router_PE == True and neighbor_elem.attrib["client"] == "True" :
                 config_lines.append(f"vrf forwarding {neighbor_elem.attrib['VRF']}")
 
-            if neighbor_num>router_num : 
+            if neighbor_num<router_num : 
                 set_networks_as.add(f"{router_num}{neighbor_num}")
                 link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
                 config_lines.append(f"ip address {link_address} {ip_mask}")
-            elif neighbor_num<router_num :  
+            elif neighbor_num>router_num :  
                 set_networks_as.add(f"{neighbor_num}{router_num}")
                 link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
                 config_lines.append(f"ip address {link_address} {ip_mask}")
@@ -164,11 +164,25 @@ for as_elem in root.findall("as"):
             
         if router_CE == True :
             for neighbor_PE in router_elem.findall("neighbor"):
-                neighbor_num = neighbor_PE.attrib["num"]
+                neighbor_num = int(neighbor_PE.attrib["num"])
+                if neighbor_num>router_num : 
+                    link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
+                elif neighbor_num<router_num :  
+                    link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
                 neighbor_as = neighbor_PE.attrib["AS"]
+                config_lines.append(f"neighbor {link_address} remote-as {neighbor_as}")
+                config_lines.append(f"!")
+            config_lines.append(f"address-family ipv4")
+            for neighbor_PE in router_elem.findall("neighbor"):
+                neighbor_num = int(neighbor_PE.attrib["num"])
+                if neighbor_num<router_num : 
+                    link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
+                elif neighbor_num>router_num :  
+                    link_address = f"{ip_subnet}{router_num}{neighbor_num}.{router_num}"
                 config_lines.append(f"network {loopback_subnet}{router_num} mask 255.255.255.255")
-                config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {neighbor_as}")
-                config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
+                config_lines.append(f"neighbor {link_address} activate")
+                config_lines.append(f"!")
+            
         
         config_lines.append(f"!")
 
