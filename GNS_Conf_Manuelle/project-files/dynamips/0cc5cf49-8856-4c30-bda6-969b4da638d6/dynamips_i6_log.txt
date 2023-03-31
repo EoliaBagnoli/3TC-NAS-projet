@@ -1,0 +1,28 @@
+Mar 25 23:29:55.352 HYPERVISOR: Release 0.2.17-x86/Windows (tag 2017072410)
+Mar 25 23:29:55.353 HYPERVISOR: Started on IP = localhost, TCP port = 57305.
+Mar 25 23:29:55.843 HYPERVISOR: exec_cmd: hypervisor version 
+Mar 25 23:29:55.843 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\wissa\GNS3\projects\Lab en Manuel\project-files\dynamips 
+Mar 25 23:29:55.844 GENERAL: working_dir=C:\Users\wissa\GNS3\projects\Lab en Manuel\project-files\dynamips
+Mar 25 23:29:55.844 HYPERVISOR: exec_cmd: hypervisor working_dir C:\Users\wissa\GNS3\projects\Lab en Manuel\project-files\dynamips\0cc5cf49-8856-4c30-bda6-969b4da638d6 
+Mar 25 23:29:55.844 GENERAL: working_dir=C:\Users\wissa\GNS3\projects\Lab en Manuel\project-files\dynamips\0cc5cf49-8856-4c30-bda6-969b4da638d6
+Mar 25 23:29:55.845 HYPERVISOR: exec_cmd: vm create CE2 6 c7200 
+Mar 25 23:29:55.846 VM: VM CE2 created.
+Mar 25 23:29:55.847 HYPERVISOR: exec_cmd: vm set_con_tcp_port CE2 5013 
+Mar 25 23:29:55.848 HYPERVISOR: exec_cmd: c7200 get_mac_addr CE2 
+Mar 25 23:29:55.848 HYPERVISOR: exec_cmd: vm get_status CE2 
+Mar 25 23:29:55.849 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 0 0 C7200-IO-FE 
+Mar 25 23:29:55.850 HYPERVISOR: exec_cmd: vm set_disk0 CE2 0 
+Mar 25 23:29:55.850 HYPERVISOR: exec_cmd: vm set_exec_area CE2 64 
+Mar 25 23:29:55.852 HYPERVISOR: exec_cmd: vm set_ios CE2 C:/Users/wissa/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Mar 25 23:29:55.852 HYPERVISOR: exec_cmd: c7200 set_mac_addr CE2 ca06.3960.0000 
+Mar 25 23:29:55.853 HYPERVISOR: exec_cmd: vm set_nvram CE2 512 
+Mar 25 23:29:55.854 HYPERVISOR: exec_cmd: vm set_ram CE2 512 
+Mar 25 23:29:55.854 HYPERVISOR: exec_cmd: vm get_status CE2 
+Mar 25 23:29:55.854 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 1 0 PA-GE 
+Mar 25 23:29:55.855 HYPERVISOR: exec_cmd: vm get_status CE2 
+Mar 25 23:29:55.855 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 2 0 PA-GE 
+Mar 25 23:29:55.856 HYPERVISOR: exec_cmd: vm get_status CE2 
+Mar 25 23:29:55.856 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 3 0 PA-GE 
+Mar 25 23:29:57.538 HYPERVISOR: exec_cmd: nio create_udp udp-516af7e0-21a3-4c06-ba66-22d8f10e4940 10004 127.0.0.1 10005 
+Mar 25 23:29:57.817 HYPERVISOR: exec_cmd: vm slot_add_nio_binding CE2 1 0 udp-516af7e0-21a3-4c06-ba66-22d8f10e4940 
+Mar 25 23:29:57.818 HYPERVISOR: exec_cmd: vm get_status CE2 
