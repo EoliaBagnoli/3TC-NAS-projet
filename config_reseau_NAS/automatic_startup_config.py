@@ -108,9 +108,31 @@ for as_elem in root.findall("as"):
                     neighbor_num = neighbor_PE.attrib["num"]
                     config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {as_number}")
                     config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
-            config_lines.append(f"!")
+            for neighbor_CE in router_elem.findall("neighbor"):
+                if neighbor_CE.attrib["client"] == "True" : 
+                    neighbor_num = neighbor_CE.attrib["num"]
+                    neighbor_as = neighbor_CE.attrib["AS"]
+                    config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {neighbor_as}")
+                    config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
+
+        if router_CE == True :
+            for neighbor_PE in router_elem.findall("neighbor"):
+                neighbor_num = neighbor_PE.attrib["num"]
+                neighbor_as = neighbor_PE.attrib["AS"]
+                config_lines.append(f"neighbor 10.10.10.{neighbor_num} remote-as {neighbor_as}")
+                config_lines.append(f"neighbor 10.10.10.{neighbor_num} update-source Loopback0")
+        
+        config_lines.append(f"!")
 
 #*******************************************************************config VPN******************************************************************************************
+
+        if router_PE == True :
+            for network in set_networks_as : 
+                config_lines.append(f"address-family vpnv4")
+                config_lines.append(f"neighbor 10.10.10.{} activate")
+                config_lines.append(f"neighbor 10.10.10.{} send-community extended")
+                config_lines.append(f"exit-address-family")
+                config_lines.append(f"!")
 
 #*******************************************************************suite en fin config************************************************************************************
         if rip_enable == True :

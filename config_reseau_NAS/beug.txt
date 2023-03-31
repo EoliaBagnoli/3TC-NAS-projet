@@ -1,0 +1,7 @@
+
+            if((router_elem.attrib["PE"] == "True") and neighbor_elem.attrib["client"] == "True") :
+                config_lines.append(f"ip address 192.168.{i}.{router_num} {ip_mask}")
+                i+=1; 
+            elif(router_elem.attrib["CE"] == "True") :
+                config_lines.append(f"ip address 192.168.{router_name[2:3]}.{router_num} {ip_mask}")
+            else : 
